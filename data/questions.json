@@ -24,13 +24,6 @@
   {
     "domain": "Judgment & Problem Solving",
     "description": "Evaluates ability to handle everyday problems and make sound decisions.",
-    "guidelines": [
-      "Logic & Coherence: Is the answer logical and makes sense?",
-      "Speed & Decisiveness: Is the patient hesitant or confident?",
-      "Complexity: Can they think of multiple steps or solutions?",
-      "Safety & Social Awareness: Do they show awareness of norms?",
-      "Comparison to Baseline: Are responses consistent with 5–10 years ago?"
-    ],
     "questions": [
       { "id": "jps1", "text": "What would you do if you were outside and it suddenly started to rain heavily?" },
       { "id": "jps2", "text": "If you found a sealed, stamped envelope on the road, what would be the right thing to do with it?" },
@@ -73,3 +66,4 @@
     ]
   }
 ]
+
