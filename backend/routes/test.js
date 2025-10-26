@@ -1,77 +1,101 @@
-// routes/test.js
-const express = require('express');
-const { authMiddleware } = require('../middleware/auth');
-const { readData, writeData } = require('../data/storage');
-const questions = require('../data/questions.json');
-const { v4: uuidv4 } = require('uuid');
-
+const express = require("express");
+const { authMiddleware } = require("../middleware/auth");
+const Test = require("../models/Test");
+const Question = require("../models/Domain");
 const router = express.Router();
 
-// public: get questions (caretaker UI will display these)
-router.get('/questions', (req, res) => {
-  res.json({ questions });
-});
-
-// start a test (creates a test record)
-router.post('/start', authMiddleware, async (req, res) => {
-  const userId = req.user.id;
-  const data = await readData();
-  const test = {
-    id: uuidv4(),
-    userId,
-    startedAt: new Date().toISOString(),
-    finishedAt: null,
-    answers: [],
-    score: null
-  };
-  data.tests.push(test);
-  await writeData(data);
-  res.json({ testId: test.id, startedAt: test.startedAt });
-});
-
-// submit answers for a test
-// expected body: { testId: "...", answers: [ { qId: "q1", rating: 2 }, ... ] }
-router.post('/submit', authMiddleware, async (req, res) => {
-  const userId = req.user.id;
-  const { testId, answers } = req.body || {};
-  if (!testId || !Array.isArray(answers)) {
-    return res.status(400).json({ error: 'testId and answers array required' });
+// GET all questions
+router.get("/questions", async (req, res) => {
+  try {
+    const data = await Question.find();
+    res.json({ questions: data });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-
-  const data = await readData();
-  const test = data.tests.find(t => t.id === testId && t.userId === userId);
-  if (!test) return res.status(404).json({ error: 'Test not found' });
-  if (test.finishedAt) return res.status(400).json({ error: 'Test already submitted' });
-
-  // store answers
-  test.answers = answers.map(a => ({ qId: a.qId, rating: Number(a.rating) }));
-  test.finishedAt = new Date().toISOString();
-
-  // basic scoring: sum of ratings (customize to your scoring rules)
-  const score = test.answers.reduce((acc, a) => acc + (Number(a.rating) || 0), 0);
-  test.score = score;
-
-  await writeData(data);
-  res.json({ testId: test.id, finishedAt: test.finishedAt, score });
 });
 
-// get test results
-router.get('/results/:testId', authMiddleware, async (req, res) => {
+// START a new test
+router.post("/start", authMiddleware, async (req, res) => {
   const userId = req.user.id;
-  const testId = req.params.testId;
-  const data = await readData();
-  const test = data.tests.find(t => t.id === testId && t.userId === userId);
-  if (!test) return res.status(404).json({ error: 'Test not found' });
-
-  res.json({ test });
+  try {
+    const test = await Test.create({ userId });
+    res.json({ testId: test._id, startedAt: test.startedAt });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// list user's tests
-router.get('/my-tests', authMiddleware, async (req, res) => {
-  const userId = req.user.id;
-  const data = await readData();
-  const tests = data.tests.filter(t => t.userId === userId);
-  res.json({ tests });
+// SUBMIT test answers
+router.post("/submit", authMiddleware, async (req, res) => {
+  const { testId, answers } = req.body;
+  if (!testId || !answers)
+    return res.status(400).json({ error: "testId and answers required" });
+
+  try {
+    const test = await Test.findById(testId);
+    if (!test) return res.status(404).json({ error: "Test not found" });
+
+    test.answers = answers;
+    test.finishedAt = new Date();
+    test.score = answers.reduce((acc, a) => acc + (Number(a.rating) || 0), 0);
+    await test.save();
+
+    res.json({ testId: test._id, finishedAt: test.finishedAt, score: test.score });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// SAVE partial answers (merge/update answers without finishing)
+router.post("/save", authMiddleware, async (req, res) => {
+  const { testId, answers } = req.body; // answers: array of { qId, rating }
+  if (!testId || !answers) return res.status(400).json({ error: "testId and answers required" });
+
+  try {
+    const test = await Test.findById(testId);
+    if (!test) return res.status(404).json({ error: "Test not found" });
+    if (test.userId.toString() !== req.user.id) return res.status(403).json({ error: "Forbidden" });
+
+    // merge incoming answers into existing answers array
+    const map = new Map();
+    (test.answers || []).forEach((a) => map.set(a.qId, a.rating));
+    (answers || []).forEach((a) => map.set(a.qId, Number(a.rating) || 0));
+
+    // rebuild answers array preserving order from existing test or from incoming order
+    const merged = Array.from(map.entries()).map(([qId, rating]) => ({ qId, rating }));
+    test.answers = merged;
+    await test.save();
+
+    res.json({ test });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET user’s tests
+router.get("/my-tests", authMiddleware, async (req, res) => {
+  try {
+    const tests = await Test.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    res.json({ tests });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET a single test result by id
+router.get("/results/:id", authMiddleware, async (req, res) => {
+  try {
+    const test = await Test.findById(req.params.id);
+    if (!test) return res.status(404).json({ error: "Test not found" });
+
+    // Ensure the requesting user owns the test
+    if (test.userId.toString() !== req.user.id)
+      return res.status(403).json({ error: "Forbidden" });
+
+    res.json({ test });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
