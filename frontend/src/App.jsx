@@ -40,7 +40,20 @@ function App() {
           {token && <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />}
           <main className="flex-1 p-4">
             <Routes>
-                <Route path="/" element={token ? <Navigate to="/dashboard" /> : <Home />} />
+                <Route
+                  path="/"
+                  element={
+                    token ? (
+                      user?.email === 'admin@gmail.com' ? (
+                        <Navigate to="/admin" />
+                      ) : (
+                        <Navigate to="/dashboard" />
+                      )
+                    ) : (
+                      <Home />
+                    )
+                  }
+                />
               <Route path="/signup" element={<Signup />} />
               <Route path="/signin" element={<Signin />} />
               <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/signin" />} />

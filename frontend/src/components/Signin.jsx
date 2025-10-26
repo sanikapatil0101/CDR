@@ -17,9 +17,13 @@ export default function Signin() {
     e.preventDefault();
     setError("");
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/signin", form);
-      login(res.data.token);
-      navigate("/dashboard");
+  const res = await axios.post("http://localhost:5000/api/auth/signin", form);
+  // pass user object to login so AuthContext stores user immediately
+  const userObj = res.data.user;
+  login(res.data.token, userObj);
+  // if admin, go to admin dashboard directly
+  if (userObj && userObj.email === 'admin@gmail.com') navigate('/admin');
+  else navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || "Signin failed");
     }

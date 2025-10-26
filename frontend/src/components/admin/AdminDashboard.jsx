@@ -36,13 +36,14 @@ export default function AdminDashboard() {
       <p className="mb-4">Total users: {users.length}</p>
       <div className="space-y-3">
         {loading ? <p>Loading...</p> : users.map((u) => (
-          <Card key={u._id || u.id} className="p-4 flex justify-between items-center">
+          // prefer stable DB id as React key; fallback to email if missing
+          <Card key={u._id || u.email} className="p-4 flex justify-between items-center">
             <div>
               <div className="font-semibold">{u.name} ({u.email})</div>
               <div className="text-sm text-gray-600">Tests: {u.totalTests} — Avg score: {u.avgScore}</div>
             </div>
             <div>
-              <Button onClick={() => navigate(`/admin/user/${u._id || u.id}`)} className="bg-blue-600 text-white">View</Button>
+              <Button onClick={() => navigate(`/admin/user/${u._id || u.email}`)} className="bg-blue-600 text-white">View</Button>
             </div>
           </Card>
         ))}

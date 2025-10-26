@@ -31,13 +31,19 @@ export default function AdminUserDetail() {
         const res = await api.get(`/admin/users/${userId}/tests`);
         setTests(res.data.tests || []);
 
-        // try to fetch user info from admin users list
+        // fetch single user info via new admin endpoint
         try {
-          const usersRes = await api.get('/admin/users');
-          const u = (usersRes.data.users || []).find((x) => String(x._id) === String(userId) || String(x.id) === String(userId));
-          if (u) setUserInfo(u);
+          const userRes = await api.get(`/admin/users/${userId}`);
+          if (userRes.data?.user) setUserInfo(userRes.data.user);
         } catch (e) {
-          console.warn('Could not fetch user info', e);
+          // fallback: try fetching users list (older behavior)
+          try {
+            const usersRes = await api.get('/admin/users');
+            const u = (usersRes.data.users || []).find((x) => String(x._id) === String(userId) || String(x.id) === String(userId));
+            if (u) setUserInfo(u);
+          } catch (e2) {
+            console.warn('Could not fetch user info', e2);
+          }
         }
       } catch (err) {
         console.error(err);
@@ -131,7 +137,7 @@ export default function AdminUserDetail() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">User: {userId}</h1>
+      <h1 className="text-2xl font-bold mb-4">User: {userInfo ? userInfo.name + ` (${userInfo.email})` : userId}</h1>
 
       {/* When a test is selected, show two-column view; otherwise center the tests list */}
       {selectedTest ? (

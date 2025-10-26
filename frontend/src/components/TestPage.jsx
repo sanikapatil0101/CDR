@@ -187,65 +187,80 @@ export default function TestPage() {
   }
 
   return (
-    <div className="min-h-screen p-6 bg-blue-50 flex justify-center">
-      <div className="w-full max-w-4xl">
-        <h1 className="text-3xl font-bold text-center mb-6">CDR Test</h1>
-        {/* single question view */}
-        <section className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-2xl font-semibold">Question {currentIndex + 1} of {total}</h2>
-            <div className="text-sm text-gray-600">{answeredCount}/30</div>
-          </div>
-          <p className="text-sm text-gray-600 mb-2">Domain {domainIndex}: {currentQuestion?.domain} — Question {qNumberInDomain} of {domainQuestions.length || 0}</p>
-          {currentQuestion && (
-            <Card className="mb-4">
-              <p className="mb-2">{currentQuestion.text}</p>
-              <div className="flex flex-wrap gap-4">
-                {[{ label: "None", val: 0 }, { label: "Questionable", val: 0.5 }, { label: "Mild", val: 1 }, { label: "Moderate", val: 2 }, { label: "Severe", val: 3 }].map((opt) => (
-                  <label key={opt.val} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name={`r-${currentQuestion.uniqueId}`}
-                      value={opt.val}
-                      checked={answers[currentQuestion.uniqueId] === opt.val}
-                      onChange={(e) => handleChange(currentQuestion.uniqueId, e.target.value)}
-                      className="accent-blue-500"
-                    />
-                    <span>{opt.label}</span>
-                  </label>
-                ))}
+    <div className="min-h-screen p-6 flex items-center justify-center">
+      <div className="w-full max-w-5xl">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold">CDR Test</h1>
+          <div className="text-sm text-gray-600">Answered: {answeredCount}/{total || "?"}</div>
+        </div>
+
+        {/* large full-screen card for current question */}
+        {currentQuestion && (
+          <div className="h-[70vh] flex items-center justify-center">
+            <Card className="w-full rounded-3xl shadow-2xl p-10" style={{ minHeight: '56vh' }}>
+              <div className="flex flex-col h-full">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h2 className="text-2xl font-semibold">Question {currentIndex + 1} of {total}</h2>
+                    <p className="text-sm text-gray-600 mt-1">Domain {domainIndex}: {currentQuestion.domain} — Q {qNumberInDomain}/{domainQuestions.length}</p>
+                  </div>
+                  <div className="text-sm text-gray-500">{new Date().toLocaleDateString()}</div>
+                </div>
+
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="max-w-3xl text-center">
+                    <p className="text-2xl leading-relaxed mb-6">{currentQuestion.text}</p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                      {[{ label: 'None', val: 0 }, { label: 'Questionable', val: 0.5 }, { label: 'Mild', val: 1 }, { label: 'Moderate', val: 2 }, { label: 'Severe', val: 3 }].map((opt) => {
+                        const selected = answers[currentQuestion.uniqueId] === opt.val;
+                        return (
+                          <button
+                            key={opt.val}
+                            onClick={() => handleChange(currentQuestion.uniqueId, opt.val)}
+                            className={`py-5 px-4 rounded-xl font-semibold focus:outline-none transition ${selected ? 'bg-[rgba(14,165,164,0.12)]' : 'big-option'}`}
+                            style={selected ? { borderWidth: 2, borderColor: 'var(--primary-600)' } : undefined}
+                          >
+                            <div className="text-lg">{opt.label}</div>
+                            <div className="text-sm text-gray-500 mt-1">{opt.val}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex items-center justify-between">
+                  <div>
+                    <Button
+                      onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+                      className={`mr-3 ${currentIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      disabled={currentIndex === 0}
+                    >
+                      Previous
+                    </Button>
+                  </div>
+
+                  <div>
+                    {currentIndex < total - 1 ? (
+                      <Button
+                        onClick={() => setCurrentIndex((i) => Math.min(total - 1, i + 1))}
+                        className={`btn-primary ${answers[currentQuestion?.uniqueId] === undefined ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={answers[currentQuestion?.uniqueId] === undefined}
+                      >
+                        Next
+                      </Button>
+                    ) : (
+                      <Button onClick={handleSubmit} className="bg-green-600 hover:bg-green-700 text-white">
+                        Submit Test
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
             </Card>
-          )}
-
-          <div className="flex items-center justify-between mt-4">
-            <div>
-              <Button
-                onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
-                className={`mr-3 ${currentIndex === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-                disabled={currentIndex === 0}
-              >
-                Previous
-              </Button>
-            </div>
-
-            <div>
-              {currentIndex < total - 1 ? (
-                <Button
-                  onClick={() => setCurrentIndex((i) => Math.min(total - 1, i + 1))}
-                  className={`bg-blue-600 hover:bg-blue-700 text-white ${answers[currentQuestion?.uniqueId] === undefined ? "opacity-50 cursor-not-allowed" : ""}`}
-                  disabled={answers[currentQuestion?.uniqueId] === undefined}
-                >
-                  Next
-                </Button>
-              ) : (
-                <Button onClick={handleSubmit} className="bg-green-600 hover:bg-green-700 text-white">
-                  Submit Test
-                </Button>
-              )}
-            </div>
           </div>
-        </section>
+        )}
       </div>
     </div>
   );
