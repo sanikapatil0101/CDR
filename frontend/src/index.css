@@ -1,38 +1,46 @@
 @import "tailwindcss";
 
-:root{
-	--bg: #f6fbfd; /* very light blue */
-	--card-bg: #ffffff;
-	--primary: #0ea5a4; /* teal */
-	--primary-600: #089189;
-	--accent: #ff7b7b; /* soft coral */
-	--muted: #6b7280;
-	--text: #0f172a;
-	--success: #16a34a;
-	--primary-gradient: linear-gradient(135deg,var(--primary),#34d399);
+/* 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
 }
 
-html,body,#root{height:100%;}
-body{
-	background: var(--bg);
-	color: var(--text);
-	-webkit-font-smoothing:antialiased;
-	-moz-osx-font-smoothing:grayscale;
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 
-.theme-card{
-	background: var(--card-bg);
-	color: var(--text);
-}
-
-.btn-primary{
-	background: var(--primary);
-	color: white;
-}
-
-.btn-primary:hover{background: var(--primary-600)}
-
-.big-option{
-	background: rgba(14,165,164,0.06);
-	border: 1px solid rgba(14,165,164,0.15);
-}
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+} */

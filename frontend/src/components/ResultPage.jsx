@@ -88,11 +88,11 @@ export default function ResultPage() {
 
           // severity for domain based on percent
           const getDomSeverity = () => {
-            if (percent <= 15) return { label: "None / Normal", className: "bg-green-200 text-green-800" };
-            if (percent <= 40) return { label: "Questionable / Very Mild", className: "bg-yellow-200 text-yellow-800" };
-            if (percent <= 60) return { label: "Mild", className: "bg-orange-200 text-orange-800" };
-            if (percent <= 85) return { label: "Moderate", className: "bg-red-200 text-red-800" };
-            return { label: "Severe", className: "bg-red-700 text-white" };
+            if (percent <= 15) return { label: "None / Normal", className: "bg-green-100 text-green-800 border border-green-200", color: "green" };
+            if (percent <= 40) return { label: "Questionable / Very Mild", className: "bg-yellow-100 text-yellow-800 border border-yellow-200", color: "yellow" };
+            if (percent <= 60) return { label: "Mild", className: "bg-orange-100 text-orange-800 border border-orange-200", color: "orange" };
+            if (percent <= 85) return { label: "Moderate", className: "bg-red-100 text-red-800 border border-red-200", color: "red" };
+            return { label: "Severe", className: "bg-red-800 text-white border border-red-900", color: "red" };
           };
 
           // top concerning questions (highest ratings)
@@ -125,112 +125,225 @@ export default function ResultPage() {
 
   if (!result)
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-cyan-200 border-t-cyan-600 rounded-full animate-spin"></div>
+          <p className="text-gray-600 font-medium text-lg">Loading assessment results...</p>
+        </div>
       </div>
     );
 
   const { score = 0, answers = [] } = result;
 
   const overallSeverity = () => {
-    if (score <= 9) return { label: "None / Normal", className: "bg-green-200 text-green-800" };
-    if (score <= 22) return { label: "Questionable / Very Mild", className: "bg-yellow-200 text-yellow-800" };
-    if (score <= 45) return { label: "Mild", className: "bg-orange-200 text-orange-800" };
-    if (score <= 67) return { label: "Moderate", className: "bg-red-200 text-red-800" };
-    return { label: "Severe", className: "bg-red-700 text-white" };
+    if (score <= 9) return { label: "None / Normal", className: "bg-green-100 text-green-800 border border-green-200", color: "green" };
+    if (score <= 22) return { label: "Questionable / Very Mild", className: "bg-yellow-100 text-yellow-800 border border-yellow-200", color: "yellow" };
+    if (score <= 45) return { label: "Mild", className: "bg-orange-100 text-orange-800 border border-orange-200", color: "orange" };
+    if (score <= 67) return { label: "Moderate", className: "bg-red-100 text-red-800 border border-red-200", color: "red" };
+    return { label: "Severe", className: "bg-red-800 text-white border border-red-900", color: "red" };
   };
 
   const overall = overallSeverity();
 
   const getSeverity = () => {
-    if (score <= 9) return { label: "None / Normal", className: "bg-green-200 text-green-800" };
-    if (score <= 22) return { label: "Questionable / Very Mild", className: "bg-yellow-200 text-yellow-800" };
-    if (score <= 45) return { label: "Mild", className: "bg-orange-200 text-orange-800" };
-    if (score <= 67) return { label: "Moderate", className: "bg-red-200 text-red-800" };
-    return { label: "Severe", className: "bg-red-700 text-white" };
+    if (score <= 9) return { label: "None / Normal", className: "bg-green-100 text-green-800 border border-green-200" };
+    if (score <= 22) return { label: "Questionable / Very Mild", className: "bg-yellow-100 text-yellow-800 border border-yellow-200" };
+    if (score <= 45) return { label: "Mild", className: "bg-orange-100 text-orange-800 border border-orange-200" };
+    if (score <= 67) return { label: "Moderate", className: "bg-red-100 text-red-800 border border-red-200" };
+    return { label: "Severe", className: "bg-red-800 text-white border border-red-900" };
   };
 
   const severity = getSeverity();
 
   return (
-    <div className="min-h-screen p-6 bg-blue-50 flex justify-center">
-      <div className="w-full max-w-3xl">
-        <Card>
-          <h1 className="text-3xl font-bold text-center mb-4">Test Result</h1>
-            <div className="text-center mb-4">
-              {/* show user info if available (admin view) */}
-              {userInfo ? (
-                <div className="mb-3">
-                  <div className="font-semibold">{userInfo.name}</div>
-                  <div className="text-sm text-gray-600">{userInfo.email}</div>
-                </div>
-              ) : null}
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50 p-6 flex justify-center">
+      <div className="w-full max-w-4xl">
+        {/* Header Section */}
+        <div className="text-center mb-8 animate-fade-in-down">
+          <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 12L11 14L15 10M12 3C13.1819 3 14.3522 3.23279 15.4442 3.68508C16.5361 4.13738 17.5282 4.80031 18.364 5.63604C19.1997 6.47177 19.8626 7.46392 20.3149 8.55585C20.7672 9.64778 21 10.8181 21 12C21 13.1819 20.7672 14.3522 20.3149 15.4442C19.8626 16.5361 19.1997 17.5282 18.364 18.364C17.5282 19.1997 16.5361 19.8626 15.4442 20.3149C14.3522 20.7672 13.1819 21 12 21C10.8181 21 9.64778 20.7672 8.55585 20.3149C7.46392 19.8626 6.47177 19.1997 5.63604 18.364C4.80031 17.5282 4.13738 16.5361 3.68508 15.4442C3.23279 14.3522 3 13.1819 3 12C3 9.61305 3.94821 7.32387 5.63604 5.63604C7.32387 3.94821 9.61305 3 12 3Z" 
+                    stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-700 bg-clip-text text-transparent mb-4">
+            Assessment Complete
+          </h1>
+          <p className="text-lg text-gray-600">Clinical Dementia Rating Results & Analysis</p>
+        </div>
 
-              <p>Score: <span className="font-semibold">{score}</span></p>
-              <p className={`inline-block mt-2 px-4 py-2 rounded-full font-semibold ${overall.className}`}>
-                Severity: {overall.label}
-              </p>
-              <p className="text-sm text-gray-600 mt-2">Answered: {answeredCount}/{totalQuestions || "?"}</p>
+        <Card className="p-8 bg-white/90 backdrop-blur-sm border border-white/60 shadow-2xl hover:shadow-3xl transition-all duration-500 animate-fade-in-up">
+          {/* Overall Score Section */}
+          <div className="text-center mb-12">
+            {userInfo ? (
+              <div className="mb-6 p-4 bg-cyan-50 border border-cyan-200 rounded-2xl">
+                <div className="font-semibold text-cyan-800 text-lg">{userInfo.name}</div>
+                <div className="text-sm text-cyan-600">{userInfo.email}</div>
+              </div>
+            ) : null}
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl">
+                <div className="text-3xl font-bold text-blue-600 mb-2">{score}</div>
+                <div className="text-sm font-medium text-blue-700">Total Score</div>
+              </div>
+              <div className="p-6 bg-gradient-to-br from-teal-50 to-green-50 border border-teal-200 rounded-2xl">
+                <div className="text-3xl font-bold text-teal-600 mb-2">{answeredCount}/{totalQuestions || "?"}</div>
+                <div className="text-sm font-medium text-teal-700">Questions Answered</div>
+              </div>
+              <div className="p-6 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl">
+                <div className={`text-xl font-bold px-4 py-2 rounded-full ${overall.className}`}>
+                  {overall.label}
+                </div>
+                <div className="text-sm font-medium text-amber-700 mt-2">Overall Severity</div>
+              </div>
             </div>
-          <h2 className="text-2xl font-semibold mb-2">Per-domain analysis</h2>
-          <div className="space-y-3">
-            {analytics.map((d) => (
-              <Card key={d.domain} className="p-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold">{d.domain}</h3>
-                    <p className="text-sm text-gray-600">Questions answered: {d.answered}/{d.totalQuestions} — Score: {d.score}/{d.maxScore} ({d.percent}%)</p>
-                  </div>
-                  <div className="ml-4">
-                    <span className={`inline-block px-3 py-1 rounded-full font-semibold ${d.severity.className}`}>{d.severity.label}</span>
-                  </div>
-                </div>
-
-                {d.topQuestions && d.topQuestions.length > 0 && (
-                  <div className="mt-3">
-                    <h4 className="font-semibold">Top concerns</h4>
-                    <ul className="list-disc list-inside text-sm">
-                      {d.topQuestions.map((t) => (
-                        <li key={t.qId} className="mt-1">
-                          <span className="font-medium">{t.rating}</span> — {t.text}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </Card>
-            ))}
           </div>
 
-          <h2 className="text-2xl font-semibold mt-4 mb-2">All answers</h2>
-          <div className="space-y-2">
-            {answers.map((a) => {
-              const domainObj = domains.find((d) => d.questions && d.questions.find((q) => q.id === a.qId));
-              const questionObj = domainObj?.questions.find((q) => q.id === a.qId);
-              const questionText = questionObj?.text || `Question ${a.qId}`;
-              const domainName = domainObj?.domain || null;
+          {/* Domain Analysis Section */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                Domain Analysis
+              </h2>
+              <div className="flex items-center gap-2 px-4 py-2 bg-teal-50 border border-teal-200 rounded-full">
+                <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-teal-700">
+                  {analytics.length} Domain{analytics.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+            </div>
 
-              return (
-                <Card key={a.qId} className="flex justify-between items-center">
-                  <div className="flex flex-col">
-                    <span className="font-medium">{questionText}</span>
-                    {domainName && <span className="text-sm text-gray-500">{domainName} — {a.qId}</span>}
+            <div className="space-y-6">
+              {analytics.map((d, index) => (
+                <Card 
+                  key={d.domain} 
+                  className="p-6 bg-gradient-to-br from-white to-gray-50/50 border border-gray-200/60 hover:border-cyan-300/50 transition-all duration-300 hover:shadow-lg animate-fade-in-up"
+                  style={{ animationDelay: `${0.2 + index * 0.1}s` }}
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-4">
+                        <h3 className="text-xl font-semibold text-gray-800">{d.domain}</h3>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${d.severity.className}`}>
+                          {d.severity.label}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="text-center p-3 bg-blue-50 rounded-xl">
+                          <div className="text-lg font-bold text-blue-600">{d.answered}/{d.totalQuestions}</div>
+                          <div className="text-xs text-blue-700">Questions</div>
+                        </div>
+                        <div className="text-center p-3 bg-teal-50 rounded-xl">
+                          <div className="text-lg font-bold text-teal-600">{d.score}/{d.maxScore}</div>
+                          <div className="text-xs text-teal-700">Score</div>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="mb-4">
+                        <div className="flex justify-between text-sm text-gray-600 mb-1">
+                          <span>Domain Progress</span>
+                          <span>{d.percent}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full transition-all duration-1000 ease-out ${
+                              d.severity.color === 'green' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
+                              d.severity.color === 'yellow' ? 'bg-gradient-to-r from-yellow-500 to-amber-600' :
+                              d.severity.color === 'orange' ? 'bg-gradient-to-r from-orange-500 to-amber-600' :
+                              'bg-gradient-to-r from-red-500 to-rose-600'
+                            }`}
+                            style={{ width: `${d.percent}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {d.topQuestions && d.topQuestions.length > 0 && (
+                        <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                          <h4 className="font-semibold text-amber-800 mb-2 flex items-center gap-2">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0377 2.66667 10.2679 4L3.33975 16C2.56995 17.3333 3.53223 19 5.07183 19Z" 
+                                    stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            </svg>
+                            Key Concerns
+                          </h4>
+                          <ul className="space-y-2">
+                            {d.topQuestions.map((t, idx) => (
+                              <li key={t.qId} className="text-sm text-amber-700 flex items-start gap-2">
+                                <span className="font-medium bg-amber-100 px-2 py-1 rounded text-xs mt-0.5">
+                                  {t.rating}
+                                </span>
+                                <span>{t.text}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <span className="font-semibold">{a.rating}</span>
                 </Card>
-              );
-            })}
+              ))}
+            </div>
           </div>
-          <div className="text-center mt-6">
+
+          {/* All Answers Section */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-6">
+              Detailed Responses
+            </h2>
+            <div className="space-y-3">
+              {answers.map((a, index) => {
+                const domainObj = domains.find((d) => d.questions && d.questions.find((q) => q.id === a.qId));
+                const questionObj = domainObj?.questions.find((q) => q.id === a.qId);
+                const questionText = questionObj?.text || `Question ${a.qId}`;
+                const domainName = domainObj?.domain || null;
+
+                return (
+                  <Card 
+                    key={a.qId} 
+                    className="p-4 bg-white/80 backdrop-blur-sm border border-gray-200/60 hover:border-cyan-300/50 transition-all duration-300 hover:shadow-md animate-fade-in-up"
+                    style={{ animationDelay: `${0.4 + index * 0.05}s` }}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-800 mb-1">{questionText}</div>
+                        {domainName && (
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <span className="px-2 py-1 bg-gray-100 rounded-full">{domainName}</span>
+                            <span>•</span>
+                            <span>{a.qId}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className={`px-4 py-2 rounded-full font-semibold text-center min-w-16 ${
+                        a.rating === 0 ? 'bg-green-100 text-green-800 border border-green-200' :
+                        a.rating === 0.5 ? 'bg-lime-100 text-lime-800 border border-lime-200' :
+                        a.rating === 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                        a.rating === 2 ? 'bg-orange-100 text-orange-800 border border-orange-200' :
+                        'bg-red-100 text-red-800 border border-red-200'
+                      }`}>
+                        {a.rating}
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Back to Dashboard */}
+          <div className="text-center pt-6 border-t border-gray-200/40">
             <Button
               onClick={() => {
                 const userId = searchParams.get('userId');
                 if (userId) return navigate(`/admin/user/${userId}`);
                 return navigate('/dashboard');
               }}
-              className="bg-green-500 hover:bg-green-600 text-white"
+              className="px-8 py-3 rounded-xl text-lg font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
             >
-              Back to Dashboard
+              Return to Dashboard
             </Button>
           </div>
         </Card>
