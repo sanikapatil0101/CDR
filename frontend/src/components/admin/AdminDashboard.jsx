@@ -57,11 +57,11 @@ export default function AdminDashboard() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-700 bg-clip-text text-transparent mb-4">
             Administration Dashboard
           </h1>
-          <p className="text-lg text-gray-600">Manage healthcare professionals and monitor clinical assessments</p>
+          <p className="text-lg text-gray-600">Manage healthcare and monitor clinical assessments</p>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
           <Card className="p-6 bg-gradient-to-br from-white to-indigo-50/50 border border-indigo-100/50 hover:border-indigo-200/80 transition-all duration-300 hover:shadow-xl animate-fade-in-up">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <div className="text-2xl font-bold text-gray-800">{users.length}</div>
-                <div className="text-sm font-medium text-indigo-700">Total Professionals</div>
+                <div className="text-sm font-medium text-indigo-700">Total Users</div>
               </div>
             </div>
           </Card>
@@ -91,22 +91,8 @@ export default function AdminDashboard() {
               </div>
             </div>
           </Card>
-
-          <Card className="p-6 bg-gradient-to-br from-white to-pink-50/50 border border-pink-100/50 hover:border-pink-200/80 transition-all duration-300 hover:shadow-xl animate-fade-in-up" style={{animationDelay: '0.2s'}}>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center shadow-md">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 12L11 14L15 10M12 3C13.1819 3 14.3522 3.23279 15.4442 3.68508C16.5361 4.13738 17.5282 4.80031 18.364 5.63604C19.1997 6.47177 19.8626 7.46392 20.3149 8.55585C20.7672 9.64778 21 10.8181 21 12C21 13.1819 20.7672 14.3522 20.3149 15.4442C19.8626 16.5361 19.1997 17.5282 18.364 18.364C17.5282 19.1997 16.5361 19.8626 15.4442 20.3149C14.3522 20.7672 13.1819 21 12 21C10.8181 21 9.64778 20.7672 8.55585 20.3149C7.46392 19.8626 6.47177 19.1997 5.63604 18.364C4.80031 17.5282 4.13738 16.5361 3.68508 15.4442C3.23279 14.3522 3 13.1819 3 12C3 9.61305 3.94821 7.32387 5.63604 5.63604C7.32387 3.94821 9.61305 3 12 3Z" 
-                        stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-gray-800">{stats.avgScore}</div>
-                <div className="text-sm font-medium text-pink-700">Avg Score</div>
-              </div>
-            </div>
-          </Card>
         </div>
+
 
         {/* Users List Section */}
         <div className="animate-fade-in-up" style={{animationDelay: '0.3s'}}>
@@ -120,7 +106,7 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-full">
               <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></div>
               <span className="text-sm font-medium text-indigo-700">
-                {users.length} Professional{users.length !== 1 ? 's' : ''}
+                {users.length} User{users.length !== 1 ? 's' : ''}
               </span>
             </div>
           </div>
@@ -129,7 +115,7 @@ export default function AdminDashboard() {
             <div className="flex justify-center items-center py-12">
               <div className="flex flex-col items-center gap-4">
                 <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                <p className="text-gray-600 font-medium">Loading professional data...</p>
+                <p className="text-gray-600 font-medium">Loading User data...</p>
               </div>
             </div>
           ) : users.length === 0 ? (
@@ -140,7 +126,7 @@ export default function AdminDashboard() {
                         stroke="#6B7280" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">No Professionals Registered</h3>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">No Users Registered</h3>
               <p className="text-gray-600 max-w-md mx-auto">
                 Healthcare professionals will appear here once they create accounts and start assessments.
               </p>

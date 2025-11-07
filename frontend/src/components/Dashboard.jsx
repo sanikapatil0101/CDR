@@ -57,7 +57,7 @@ export default function Dashboard() {
             Clinical Assessment Dashboard
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Manage your cognitive assessment tests and track patient progress with comprehensive clinical insights.
+            Manage cognitive assessment tests and track progress with comprehensive clinical insights.
           </p>
         </div>
 
@@ -67,7 +67,7 @@ export default function Dashboard() {
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-gray-800">Begin New Assessment</h2>
               <p className="text-gray-600">
-                Start a comprehensive clinical dementia rating evaluation for your patient.
+                Start a comprehensive clinical dementia rating evaluation.
               </p>
               <Button
                 onClick={startTest}

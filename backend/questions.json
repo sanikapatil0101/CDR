@@ -6,7 +6,7 @@
       { "id": "mem1", "text": "Please tell me what you had for your last meal (e.g., breakfast or lunch). Can you describe it?" },
       { "id": "mem2", "text": "Can you name the current Prime Minister of India and one significant recent news event?" },
       { "id": "mem3", "text": "Tell me about an important family event from the last year, like a wedding, festival, or a visit from a relative." },
-      { "id": "mem4", "text": "I am going to give you three words: 'River,' 'Table,' and 'Rupee.' Please remember them. I will ask you what they are in a few minutes." },
+      { "id": "mem4", "text": "Can you tell me what you did yesterday afternoon?" },
       { "id": "mem5", "text": "Can you tell me the names of your children or a close sibling?" }
     ]
   },

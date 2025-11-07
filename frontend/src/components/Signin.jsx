@@ -59,7 +59,7 @@ export default function Signin() {
                 <input
                   type="email"
                   name="email"
-                  placeholder="Professional Email"
+                  placeholder="Email"
                   value={form.email}
                   onChange={handleChange}
                   required
@@ -121,11 +121,11 @@ export default function Signin() {
           </div>
 
           {/* Quick role hint */}
-          <div className="mt-6 p-4 bg-cyan-50 rounded-xl border border-cyan-100">
+          {/* <div className="mt-6 p-4 bg-cyan-50 rounded-xl border border-cyan-100">
             <p className="text-sm text-cyan-700 text-center">
               <strong>Clinician Access:</strong> Sign in with your registered credentials
             </p>
-          </div>
+          </div> */}
         </Card>
       </div>
     </div>
