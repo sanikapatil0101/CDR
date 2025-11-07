@@ -3,9 +3,11 @@ import { AuthContext } from '../context/AuthContext';
 import api from '../api';
 import Card from './ui/Card';
 import Button from './ui/Button';
+import getSeverityForScore from '../utils/severity';
 
 export default function Profile() {
   const { user, token } = useContext(AuthContext);
+  const [profileUser, setProfileUser] = useState(user);
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,6 +27,32 @@ export default function Profile() {
     fetch();
   }, [token]);
 
+  // Ensure we have the latest full user profile (includes DOB, age, bloodGroup, gender, otherHealthIssues)
+  useEffect(() => {
+    if (!token) {
+      setProfileUser(null);
+      return;
+    }
+
+    const loadProfile = async () => {
+      try {
+        const res = await api.get('/auth/me');
+        if (res.data?.user) setProfileUser(res.data.user);
+      } catch (err) {
+        // keep existing user if call fails
+        console.error('Failed to load profile:', err?.response?.data || err.message);
+      }
+    };
+
+    // If we don't have patient fields locally, fetch fresh profile
+    if (!user || !user.dob || !user.bloodGroup) {
+      loadProfile();
+    } else {
+      // keep context user as baseline
+      setProfileUser(user);
+    }
+  }, [token, user]);
+
   const completedTests = tests.filter(t => t.finishedAt).length;
   const avgScore = completedTests > 0 
     ? (tests.reduce((sum, t) => sum + (t.score || 0), 0) / completedTests).toFixed(1)
@@ -35,13 +63,13 @@ export default function Profile() {
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12 animate-fade-in-down">
-          <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="white" strokeWidth="2"/>
               <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" stroke="white" strokeWidth="2"/>
             </svg>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-700 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-cyan-700 bg-clip-text text-transparent mb-4">
             User Profile
           </h1>
           <p className="text-lg text-gray-600">Your clinical assessment overview and performance metrics</p>
@@ -76,15 +104,35 @@ export default function Profile() {
               <div className="space-y-3">
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
                   <span className="font-medium text-gray-600">Full Name</span>
-                  <span className="font-semibold text-gray-800">{user?.name}</span>
+                  <span className="font-semibold text-gray-800">{profileUser?.name}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
                   <span className="font-medium text-gray-600">Email Address</span>
-                  <span className="font-semibold text-gray-800">{user?.email}</span>
+                  <span className="font-semibold text-gray-800">{profileUser?.email}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
                   <span className="font-medium text-gray-600">Account Type</span>
                   <span className="font-semibold text-purple-600">patient+caretaker</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                  <span className="font-medium text-gray-600">Date of Birth</span>
+                  <span className="font-semibold text-gray-800">{profileUser?.dob ? new Date(profileUser.dob).toLocaleDateString() : '-'}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                  <span className="font-medium text-gray-600">Age</span>
+                  <span className="font-semibold text-gray-800">{profileUser?.age ?? '-'}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                  <span className="font-medium text-gray-600">Blood Group</span>
+                  <span className="font-semibold text-gray-800">{profileUser?.bloodGroup || '-'}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                  <span className="font-medium text-gray-600">Gender</span>
+                  <span className="font-semibold text-gray-800">{profileUser?.gender || '-'}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                  <span className="font-medium text-gray-600">Other Health Issues</span>
+                  <span className="font-semibold text-gray-800">{profileUser?.otherHealthIssues || '-'}</span>
                 </div>
               </div>
             </div>
@@ -195,6 +243,14 @@ export default function Profile() {
                             </>
                           ) : (
                             <span className="text-sm text-amber-600 font-medium">In Progress</span>
+                          )}
+                          {t.caretaker?.name && (
+                            <div className="ml-3">
+                              <span className="text-sm font-medium text-blue-800">
+  <span className="font-bold">CareTaker:</span> {t.caretaker.name}
+</span>
+
+                            </div>
                           )}
                         </div>
                       </div>

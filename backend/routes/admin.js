@@ -27,12 +27,23 @@ router.get('/users', authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
-// GET single user info (name, email)
+// GET single user info (include patient health fields)
 router.get('/users/:userId', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const u = await User.findById(req.params.userId).select('name email');
+    // include medical/patient fields so admin UI can display them
+    const u = await User.findById(req.params.userId).select('name email dob age bloodGroup gender otherHealthIssues createdAt');
     if (!u) return res.status(404).json({ error: 'User not found' });
-    res.json({ user: { _id: u._id, name: u.name, email: u.email } });
+    res.json({ user: {
+      _id: u._id,
+      name: u.name,
+      email: u.email,
+      dob: u.dob,
+      age: u.age,
+      bloodGroup: u.bloodGroup,
+      gender: u.gender,
+      otherHealthIssues: u.otherHealthIssues,
+      createdAt: u.createdAt,
+    } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

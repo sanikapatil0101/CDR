@@ -6,6 +6,7 @@ import Home from "./components/Home";
 import Dashboard from "./components/Dashboard";
 import TestPage from "./components/TestPage";
 import ResultPage from "./components/ResultPage";
+import Guidelines from "./components/Guidelines";
 import { AuthContext } from "./context/AuthContext";
 import Profile from "./components/Profile";
 import Analytics from "./components/Analytics";
@@ -57,6 +58,7 @@ function App() {
               <Route path="/signup" element={<Signup />} />
               <Route path="/signin" element={<Signin />} />
               <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/signin" />} />
+              <Route path="/guidelines" element={token ? <Guidelines /> : <Navigate to="/signin" />} />
               <Route path="/profile" element={token ? <Profile /> : <Navigate to="/signin" />} />
               <Route path="/analytics" element={token ? <Analytics /> : <Navigate to="/signin" />} />
               <Route path="/test/:testId?" element={token ? <TestPage /> : <Navigate to="/signin" />} />

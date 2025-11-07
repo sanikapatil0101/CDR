@@ -17,22 +17,24 @@ export default function AdminDashboard() {
       navigate('/signin');
       return;
     }
+
     const fetch = async () => {
       try {
         setLoading(true);
         const res = await api.get('/admin/users');
-        setUsers(res.data.users || []);
+        const list = res.data.users || res.data || [];
+        setUsers(list);
 
-        // Calculate admin stats
-        const totalTests = users.reduce((sum, u) => sum + (u.totalTests || 0), 0);
-        const totalScore = users.reduce((sum, u) => sum + (u.avgScore || 0) * (u.totalTests || 0), 0);
+        // Calculate admin stats from the fetched list (not from state which may be stale)
+        const totalTests = list.reduce((sum, u) => sum + (u.totalTests || 0), 0);
+        const totalScore = list.reduce((sum, u) => sum + (u.avgScore || 0) * (u.totalTests || 0), 0);
         const avgScore = totalTests > 0 ? (totalScore / totalTests).toFixed(1) : 0;
-        const activeUsers = users.filter(u => (u.totalTests || 0) > 0).length;
+        const activeUsers = list.filter((u) => (u.totalTests || 0) > 0).length;
 
         setStats({
           totalTests,
           avgScore,
-          activeUsers
+          activeUsers,
         });
       } catch (err) {
         console.error(err);
@@ -40,8 +42,9 @@ export default function AdminDashboard() {
         setLoading(false);
       }
     };
+
     fetch();
-  }, [user, navigate, users.length]);
+  }, [user, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6">

@@ -176,9 +176,17 @@ export default function ResultPage() {
           {/* Overall Score Section */}
           <div className="text-center mb-12">
             {userInfo ? (
-              <div className="mb-6 p-4 bg-cyan-50 border border-cyan-200 rounded-2xl">
-                <div className="font-semibold text-cyan-800 text-lg">{userInfo.name}</div>
-                <div className="text-sm text-cyan-600">{userInfo.email}</div>
+              <div className="mb-6 p-4 bg-cyan-50 border border-cyan-200 rounded-2xl flex items-center justify-between">
+                <div>
+                  <div className="font-semibold text-cyan-800 text-lg">{userInfo.name}</div>
+                  <div className="text-sm text-cyan-600">{userInfo.email}</div>
+                </div>
+                {result?.caretaker?.name && (
+                  <div className="text-right">
+                    <div className="text-xs text-gray-500">Caretaker</div>
+                    <div className="font-medium text-gray-800">{result.caretaker.name}</div>
+                  </div>
+                )}
               </div>
             ) : null}
 
@@ -206,6 +214,13 @@ export default function ResultPage() {
               <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                 Domain Analysis
               </h2>
+              {result?.caretaker?.name && (
+                <div className="text-sm text-gray-600">
+  <span className="font-bold text-gray-800">CareTaker:</span>{" "}
+  <span className="font-medium text-gray-800">{result.caretaker.name}</span>
+</div>
+
+              )}
               <div className="flex items-center gap-2 px-4 py-2 bg-teal-50 border border-teal-200 rounded-full">
                 <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></div>
                 <span className="text-sm font-medium text-teal-700">

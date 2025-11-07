@@ -6,18 +6,51 @@ import Card from "./ui/Card";
 
 export default function Signup() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", dob: "", age: "", bloodGroup: "", gender: "", otherHealthIssues: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+  // Enhanced change handler: auto-calc age from DOB when DOB changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'dob') {
+      // compute age in years
+      const dob = value ? new Date(value) : null;
+      if (dob && !isNaN(dob.getTime())) {
+        const diff = Date.now() - dob.getTime();
+        const age = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+        setForm({ ...form, dob: value, age: String(age) });
+        return;
+      }
+    }
+    setForm({ ...form, [name]: value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    // client-side password constraints: minimum 8 characters
+    if (!form.password || form.password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
     setIsLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/auth/signup", form);
+      // prepare payload with correct types (age as Number or undefined)
+      const payload = {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        dob: form.dob || undefined,
+        age: form.age ? Number(form.age) : undefined,
+        bloodGroup: form.bloodGroup,
+        gender: form.gender,
+        otherHealthIssues: form.otherHealthIssues,
+      };
+
+      await axios.post("http://localhost:5000/api/auth/signup", payload);
       alert("Signup successful! Please sign in.");
       navigate("/signin");
     } catch (err) {
@@ -55,7 +88,7 @@ export default function Signup() {
                   name="name"
                   placeholder="Full Name"
                   value={form.name}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-300 focus:border-teal-400 focus:outline-none transition-all duration-300 bg-white/50 backdrop-blur-sm"
                 />
@@ -66,7 +99,7 @@ export default function Signup() {
                   name="email"
                   placeholder="Email"
                   value={form.email}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-300 focus:border-teal-400 focus:outline-none transition-all duration-300 bg-white/50 backdrop-blur-sm"
                 />
@@ -77,9 +110,83 @@ export default function Signup() {
                   name="password"
                   placeholder="Create Password"
                   value={form.password}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-300 focus:border-teal-400 focus:outline-none transition-all duration-300 bg-white/50 backdrop-blur-sm"
+                />
+                <p className="text-xs text-gray-500 mt-2">Password must be at least 8 characters. Use a mix of letters and numbers for better security.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-gray-600">Date of Birth</label>
+                  <input
+                    type="date"
+                    name="dob"
+                    value={form.dob}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-300 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600">Age</label>
+                  <input
+                    type="number"
+                    name="age"
+                    value={form.age}
+                    readOnly
+                    aria-readonly="true"
+                    title="Auto-calculated from DOB"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 cursor-not-allowed"
+                  />
+                  {/* <p className="text-xs text-gray-400 mt-1">Age is auto-calculated from Date of Birth.</p> */}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-gray-600">Blood Group</label>
+                  <select
+                    name="bloodGroup"
+                    value={form.bloodGroup}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-300 focus:outline-none"
+                  >
+                    <option value="">Select Blood Group</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600">Gender</label>
+                  <select
+                    name="gender"
+                    value={form.gender}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-300 focus:outline-none"
+                  >
+                    <option value="">Select</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Other health issues (diabetes, BP, etc.)</label>
+                <textarea
+                  name="otherHealthIssues"
+                  value={form.otherHealthIssues}
+                  onChange={handleInputChange}
+                  placeholder="List any relevant medical conditions"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-300 focus:outline-none"
                 />
               </div>
             </div>

@@ -4,6 +4,7 @@ import api from '../../api';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import { AuthContext } from '../../context/AuthContext';
+import getSeverityForScore from '../../utils/severity';
 
 export default function AdminUserDetail() {
   const { user } = useContext(AuthContext);
@@ -25,25 +26,37 @@ export default function AdminUserDetail() {
       return;
     }
 
-    const fetch = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await api.get(`/admin/users/${userId}/tests`);
-        setTests(res.data.tests || []);
 
-        // fetch single user info via new admin endpoint
+        // fetch user info (admin endpoint)
         try {
-          const userRes = await api.get(`/admin/users/${userId}`);
-          if (userRes.data?.user) setUserInfo(userRes.data.user);
+          const uRes = await api.get(`/admin/users/${userId}`);
+          setUserInfo(uRes.data.user || uRes.data);
         } catch (e) {
-          // fallback: try fetching users list (older behavior)
-          try {
-            const usersRes = await api.get('/admin/users');
-            const u = (usersRes.data.users || []).find((x) => String(x._id) === String(userId) || String(x.id) === String(userId));
-            if (u) setUserInfo(u);
-          } catch (e2) {
-            console.warn('Could not fetch user info', e2);
+          console.warn('Failed to fetch admin user info', e);
+        }
+
+        // fetch tests for user
+        try {
+          const tRes = await api.get(`/admin/users/${userId}/tests`);
+          const list = tRes.data.tests || tRes.data || [];
+          setTests(list);
+
+          if (testId) {
+            // try to fetch specific test
+            try {
+              const single = await api.get(`/admin/users/${userId}/tests/${testId}`);
+              setSelectedTest(single.data.test || single.data);
+            } catch (e) {
+              // fallback to selecting from list
+              const found = list.find((x) => String(x._id) === String(testId) || String(x.id) === String(testId));
+              if (found) setSelectedTest(found);
+            }
           }
+        } catch (e) {
+          console.warn('Failed to fetch tests for user', e);
         }
       } catch (err) {
         console.error(err);
@@ -52,96 +65,10 @@ export default function AdminUserDetail() {
       }
     };
 
-    fetch();
-  }, [user, userId, navigate]);
+    fetchData();
+  }, [user, navigate, userId, testId]);
 
-  useEffect(() => {
-    const fetchTest = async () => {
-      if (!testId) return;
-      try {
-        const res = await api.get(`/admin/users/${userId}/tests/${testId}`);
-        setSelectedTest(res.data.test || null);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchTest();
-  }, [testId, userId]);
-
-  // compute analytics when a test is selected
-  useEffect(() => {
-    if (!selectedTest) return;
-
-    const fetchDomainsAndCompute = async () => {
-      try {
-        const res = await api.get('/domains');
-        const domainList = res.data || [];
-        setDomains(domainList);
-
-        const qMap = {};
-        let totalQ = 0;
-        domainList.forEach((d) => {
-          (d.questions || []).forEach((q) => {
-            qMap[q.id] = { text: q.text, domain: d.domain };
-            totalQ += 1;
-          });
-        });
-
-        setTotalQuestions(totalQ);
-
-        const answers = selectedTest.answers || [];
-        setAnsweredCount(answers.filter((a) => a.rating !== undefined && a.rating !== null).length);
-
-        const byDomain = domainList.map((d) => {
-          const qIds = (d.questions || []).map((q) => q.id);
-          const domainAnswers = answers.filter((a) => qIds.includes(a.qId));
-          const answered = domainAnswers.length;
-          const score = domainAnswers.reduce((s, a) => s + (Number(a.rating) || 0), 0);
-          const maxScore = qIds.length * 3;
-          const percent = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
-
-          const getDomSeverity = () => {
-            if (percent <= 15) return { label: 'None / Normal', className: 'bg-green-100 text-green-800 border border-green-200', color: 'green' };
-            if (percent <= 40) return { label: 'Questionable / Very Mild', className: 'bg-yellow-100 text-yellow-800 border border-yellow-200', color: 'yellow' };
-            if (percent <= 60) return { label: 'Mild', className: 'bg-orange-100 text-orange-800 border border-orange-200', color: 'orange' };
-            if (percent <= 85) return { label: 'Moderate', className: 'bg-red-100 text-red-800 border border-red-200', color: 'red' };
-            return { label: 'Severe', className: 'bg-red-800 text-white border border-red-900', color: 'red' };
-          };
-
-          const topQuestions = domainAnswers
-            .slice()
-            .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-            .slice(0, 3)
-            .map((a) => ({ qId: a.qId, rating: a.rating, text: qMap[a.qId]?.text || a.qId }));
-
-          return {
-            domain: d.domain,
-            totalQuestions: qIds.length,
-            answered,
-            score,
-            maxScore,
-            percent,
-            severity: getDomSeverity(),
-            topQuestions,
-          };
-        });
-
-        setAnalytics(byDomain);
-      } catch (err) {
-        console.error('Failed to fetch domains for analytics', err);
-      }
-    };
-
-    fetchDomainsAndCompute();
-  }, [selectedTest]);
-
-  const getOverallSeverity = (score) => {
-    if (score <= 9) return { label: 'None / Normal', className: 'bg-green-100 text-green-800 border border-green-200' };
-    if (score <= 22) return { label: 'Questionable / Very Mild', className: 'bg-yellow-100 text-yellow-800 border border-yellow-200' };
-    if (score <= 45) return { label: 'Mild', className: 'bg-orange-100 text-orange-800 border border-orange-200' };
-    if (score <= 67) return { label: 'Moderate', className: 'bg-red-100 text-red-800 border border-red-200' };
-    return { label: 'Severe', className: 'bg-red-800 text-white border border-red-900' };
-  };
+  // use shared severity helper
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6">
@@ -165,9 +92,48 @@ export default function AdminUserDetail() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-700 bg-clip-text text-transparent mb-2">
             User Profile
           </h1>
-          <p className="text-lg text-gray-600">
-            {userInfo ? `${userInfo.name} • ${userInfo.email}` : `User ID: ${userId}`}
-          </p>
+          <div className="mt-4">
+            {userInfo ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                <div className="flex items-center gap-4 md:col-span-1">
+                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg text-white font-bold text-xl">
+                    {userInfo.name ? (userInfo.name.split(' ').map(n=>n[0]).slice(0,2).join('')) : 'U'}
+                  </div>
+                  <div>
+                    <div className="text-lg font-semibold text-gray-800">{userInfo.name}</div>
+                    <div className="text-sm text-gray-500">{userInfo.email}</div>
+                    {/* <div className="text-xs text-gray-400 mt-1">Member ID: {String(userInfo._id || userInfo.id).slice(-6)}</div> */}
+                  </div>
+                </div>
+
+                <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-3 bg-white/80 border border-white/60 rounded-2xl">
+                    <div className="text-xs text-gray-500">Date of Birth</div>
+                    <div className="font-medium text-gray-800">{userInfo.dob ? new Date(userInfo.dob).toLocaleDateString() : '-'}</div>
+                  </div>
+                  <div className="p-3 bg-white/80 border border-white/60 rounded-2xl">
+                    <div className="text-xs text-gray-500">Age</div>
+                    <div className="font-medium text-gray-800">{userInfo.age ?? '-'}</div>
+                  </div>
+                  <div className="p-3 bg-white/80 border border-white/60 rounded-2xl">
+                    <div className="text-xs text-gray-500">Blood Group</div>
+                    <div className="font-medium text-gray-800">{userInfo.bloodGroup || '-'}</div>
+                  </div>
+
+                  <div className="p-3 bg-white/80 border border-white/60 rounded-2xl">
+                    <div className="text-xs text-gray-500">Gender</div>
+                    <div className="font-medium text-gray-800">{userInfo.gender || '-'}</div>
+                  </div>
+                  <div className="p-3 bg-white/80 border border-white/60 rounded-2xl sm:col-span-2">
+                    <div className="text-xs text-gray-500">Other Health Issues</div>
+                    <div className="font-medium text-gray-800">{userInfo.otherHealthIssues || '-'}</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="text-lg text-gray-600">User ID: {userId}</p>
+            )}
+          </div>
         </div>
 
         {/* When a test is selected, show two-column view; otherwise center the tests list */}
@@ -209,6 +175,9 @@ export default function AdminUserDetail() {
                                 <span className="text-xs font-medium px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
                                   Score: {t.score}
                                 </span>
+                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${getSeverityForScore(t.score).className}`}>
+                                  {getSeverityForScore(t.score).label}
+                                </span>
                               </div>
                             )}
                           </div>
@@ -245,8 +214,8 @@ export default function AdminUserDetail() {
                       <div className="text-sm font-medium text-teal-700">Questions Answered</div>
                     </div>
                     <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl">
-                      <div className={`text-lg font-bold px-4 py-2 rounded-full ${getOverallSeverity(selectedTest.score).className}`}>
-                        {getOverallSeverity(selectedTest.score).label}
+                      <div className={`text-lg font-bold px-4 py-2 rounded-full ${getSeverityForScore(selectedTest.score).className}`}>
+                        {getSeverityForScore(selectedTest.score).label}
                       </div>
                       <div className="text-sm font-medium text-amber-700 mt-2">Overall Severity</div>
                     </div>
@@ -422,18 +391,11 @@ export default function AdminUserDetail() {
                               ? 'bg-gradient-to-br from-green-500 to-emerald-600' 
                               : 'bg-gradient-to-br from-amber-500 to-orange-600'
                           }`}>
-                            {t.finishedAt ? (
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 12L11 14L15 10M12 3C13.1819 3 14.3522 3.23279 15.4442 3.68508C16.5361 4.13738 17.5282 4.80031 18.364 5.63604C19.1997 6.47177 19.8626 7.46392 20.3149 8.55585C20.7672 9.64778 21 10.8181 21 12C21 13.1819 20.7672 14.3522 20.3149 15.4442C19.8626 16.5361 19.1997 17.5282 18.364 18.364C17.5282 19.1997 16.5361 19.8626 15.4442 20.3149C14.3522 20.7672 13.1819 21 12 21C10.8181 21 9.64778 20.7672 8.55585 20.3149C7.46392 19.8626 6.47177 19.1997 5.63604 18.364C4.80031 17.5282 4.13738 16.5361 3.68508 15.4442C3.23279 14.3522 3 13.1819 3 12C3 9.61305 3.94821 7.32387 5.63604 5.63604C7.32387 3.94821 9.61305 3 12 3Z" 
-                                      stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            ) : (
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 8V12L14 14M12 3C13.1819 3 14.3522 3.23279 15.4442 3.68508C16.5361 4.13738 17.5282 4.80031 18.364 5.63604C19.1997 6.47177 19.8626 7.46392 20.3149 8.55585C20.7672 9.64778 21 10.8181 21 12C21 13.1819 20.7672 14.3522 20.3149 15.4442C19.8626 16.5361 19.1997 17.5282 18.364 18.364C17.5282 19.1997 16.5361 19.8626 15.4442 20.3149C14.3522 20.7672 13.1819 21 12 21C10.8181 21 9.64778 20.7672 8.55585 20.3149C7.46392 19.8626 6.47177 19.1997 5.63604 18.364C4.80031 17.5282 4.13738 16.5361 3.68508 15.4442C3.23279 14.3522 3 13.1819 3 12C3 9.61305 3.94821 7.32387 5.63604 5.63604C7.32387 3.94821 9.61305 3 12 3Z" 
-                                      stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            )}
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 8V12L14 14" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
                           </div>
+
                           <div>
                             <div className="font-semibold text-gray-800">
                               {new Date(t.startedAt).toLocaleDateString()} • {new Date(t.startedAt).toLocaleTimeString()}
@@ -441,8 +403,11 @@ export default function AdminUserDetail() {
                             <div className="flex items-center gap-3 mt-1">
                               {t.finishedAt ? (
                                 <>
-                                  <span className="text-sm font-medium px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                                  <span className="text-sm font-medium px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
                                     Score: {t.score}
+                                  </span>
+                                  <span className={`text-sm font-semibold px-2 py-1 rounded-full ml-2 ${getSeverityForScore(t.score).className}`}>
+                                    {getSeverityForScore(t.score).label}
                                   </span>
                                   <span className="text-sm text-green-600 font-medium">Completed</span>
                                 </>
@@ -452,7 +417,7 @@ export default function AdminUserDetail() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <Button 
                           onClick={() => navigate(`/result/${t._id || t.id}?userId=${userId}`)}
                           className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"

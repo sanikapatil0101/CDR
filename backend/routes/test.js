@@ -15,11 +15,21 @@ router.get("/questions", async (req, res) => {
 });
 
 // START a new test
+// Require caretaker.email and caretaker.relation; store caretaker details on the test record
 router.post("/start", authMiddleware, async (req, res) => {
   const userId = req.user.id;
+  const { caretaker } = req.body || {};
+
+  // Basic validation: caretaker must include email and relation
+  if (!caretaker || !caretaker.email || !caretaker.relation) {
+    return res.status(400).json({ error: "caretaker.email and caretaker.relation are required" });
+  }
+
   try {
-    const test = await Test.create({ userId });
-    res.json({ testId: test._id, startedAt: test.startedAt });
+    // coerce age to number if present
+    if (caretaker.age) caretaker.age = Number(caretaker.age);
+    const test = await Test.create({ userId, caretaker });
+    res.json({ testId: test._id, startedAt: test.startedAt, test });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

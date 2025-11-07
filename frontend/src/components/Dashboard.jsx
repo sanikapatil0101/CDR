@@ -4,6 +4,7 @@ import api from "../api";
 import { AuthContext } from "../context/AuthContext";
 import Button from "./ui/Button";
 import Card from "./ui/Card";
+import getSeverityForScore from '../utils/severity';
 
 export default function Dashboard() {
   const { token } = useContext(AuthContext);
@@ -31,13 +32,8 @@ export default function Dashboard() {
 
   const startTest = async () => {
     if (!token) return navigate("/signin");
-    try {
-      const res = await api.post("/test/start");
-      navigate(`/test/${res.data.testId}`);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to start test.");
-    }
+    // Navigate to guidelines page where caretaker details are collected before starting
+    navigate("/guidelines");
   };
 
   const hasPending = tests.some((t) => !t.finishedAt);
@@ -170,6 +166,14 @@ export default function Dashboard() {
                             <span className="text-xs font-medium px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
                               Score: {t.score}
                             </span>
+                            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${getSeverityForScore(t.score).className}`}>
+                              {getSeverityForScore(t.score).label}
+                            </span>
+                          </div>
+                        )}
+                        {t.caretaker?.name && (
+                          <div className="mt-2">
+                            <span className="text-sm font-medium text-teal-800">Caretaker: {t.caretaker.name}</span>
                           </div>
                         )}
                       </div>
