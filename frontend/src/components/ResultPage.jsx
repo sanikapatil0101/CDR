@@ -176,19 +176,51 @@ export default function ResultPage() {
           {/* Overall Score Section */}
           <div className="text-center mb-12">
             {userInfo ? (
-              <div className="mb-6 p-4 bg-cyan-50 border border-cyan-200 rounded-2xl flex items-center justify-between">
-                <div>
-                  <div className="font-semibold text-cyan-800 text-lg">{userInfo.name}</div>
-                  <div className="text-sm text-cyan-600">{userInfo.email}</div>
-                </div>
-                {result?.caretaker?.name && (
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500">Caretaker</div>
-                    <div className="font-medium text-gray-800">{result.caretaker.name}</div>
+              <div className="mb-6 p-4 bg-cyan-50 border border-cyan-200 rounded-2xl">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                  
+                  {/* User Info */}
+                  <div className="text-left md:text-left">
+                    <div className="font-semibold text-cyan-800 text-lg">
+                      {userInfo.name}
+                    </div>
+                    <div className="text-sm text-cyan-600">{userInfo.email}</div>
                   </div>
-                )}
+
+                  {/* Caretaker Info */}
+                  <div className="bg-white border border-cyan-100 rounded-xl p-4 shadow-sm w-full md:w-auto">
+                      <div className="text-medium text-gray-500 mb-3 text-left">Caretaker</div>
+
+                      {result?.caretaker ? (
+                        <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-left">
+                          <div className="font-medium text-gray-800">Name:</div>
+                          <div>{result.caretaker.name || "-"}</div>
+
+                          <div className="font-medium text-gray-800">Gender:</div>
+                          <div>{result.caretaker.gender || "-"}</div>
+
+                          <div className="font-medium text-gray-800">Age:</div>
+                          <div>{result.caretaker.age || "-"}</div>
+
+                          <div className="font-medium text-gray-800">Mobile:</div>
+                          <div>{result.caretaker.mobile || "-"}</div>
+
+                          <div className="font-medium text-gray-800">Email:</div>
+                          <div>{result.caretaker.email || "-"}</div>
+
+                          <div className="font-medium text-gray-800">Relation:</div>
+                          <div>{result.caretaker.relation || "-"}</div>
+                        </div>
+                      ) : (
+                        <div className="text-gray-600">-</div>
+                      )}
+                    </div>
+
+                </div>
               </div>
             ) : null}
+
+
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl">
